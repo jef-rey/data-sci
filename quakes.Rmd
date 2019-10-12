@@ -2,9 +2,16 @@
 title: "examples with git and R"
 output: html_notebook
 ---
+# Introduction
+
 First, we load the dataset from "quakes", a built-in data set from within R Studio
 ```{r}
 earthquakes <- data("quakes")
 print(summary(quakes))
 ```
 
+#Background
+Some background history
+
+# Analysis
+This is the analysis of the data
