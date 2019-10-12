@@ -1,4 +1,62 @@
 ---
-title: "Jeff Anderson's Landing Page"
-output: html_notebook
+title: "Jeff Anderson's Super Fun Data Science Page"
+output:
+  html_document:
+    df_print: paged
 ---
+
+# for 385 - Introduction to Data Science
+## *Part 1 - Design and Prep*
+
+### Introduction
+The goal of this project is to analyze and descern whether the weather creates more instances of crime in the Denver metropolitan area. 
+I am motivated by my interest in being able to visualize data and the things we can learn from it. At this point, I only have my few ideas about what paths the data could lead us down, and I have no idea whether they are right or not. 
+
+I want to start off by importing the crime statistics data I got from [the Denver City and County's website and their open data catalog](https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-crime). It is a credible source, authored by the City and County of Denver, Denver Police Department, and the Denver Police Data Analysis Unit. It is maintained using the Denver Geographic Information Systems data by the City and County of Denver, Technology Services. 
+
+To start, let's import our data.
+Unfortunately, due to the size of the dataset I couldn't 1) open the entire thing on my computer or 2) host a file that large on github. In an effort to have at least *some* data for you to look at, I opened the file in Apple Numbers and the program cut off any data passed the 65,535 rows it tops out at. So that's what we'll be cleaning up here. 
+
+### Cleaning up
+
+The first step in the process is to import the data so that we can manipulate it. The file I am pulling in is [hosted here](https://github.com/jef-rey/data-sci)
+```{r}
+#libraries we will be using 
+suppressMessages(library("tidyverse"))
+suppressMessages(library("dplyr"))
+suppressMessages(library("tidyr"))
+suppressMessages(library("sqldf"))
+suppressMessages(library("lubridate"))
+
+full_crime_data <- read_csv("https://raw.githubusercontent.com/jef-rey/data-sci/master/denver_crime_CSV.csv")
+
+```
+
+We can peak at the first few rows of the file using `head`
+```{r}
+head(full_crime_data)
+```
+We can see here that there are multiple variables. The location variables (incident address, latitude and longitude, geo_x and geo_y, and the IDs (district, precinct, and neighborhood)) would be considered categorical because they are descriptive of something. The incident ID and the dates (the first and last occurence, and the reported date) are continuous data elements. 
+
+
+I am also going to load in the `offense_codes` CSV file so that we can combine and condense the table I want to create.
+```{r}
+offense_codes <- read_csv("https://raw.githubusercontent.com/jef-rey/data-sci/master/offense_codes.csv")
+
+```
+
+First, we're going to separate traffic crime data from the other crimes using the `sqldf` library. The `sqldf` library makes it easy to parse booleans (since the `IS_CRIME` and `IS_TRAFFIC` columns are booleans, that is, they are denoted by either a 0 for false or a 1 for true). 
+```{r}
+Traffic_crime <- sqldf("select * from full_crime_data where IS_TRAFFIC=1")
+```
+
+
+Let's see if theres any correlation between time of year and number of traffic incidents.
+First, we'll convert the date into something more manageable.
+```{r}
+#Traffic_crime$REPORTED_DATE <- as.POSIXct(parse_date(Traffic_crime$REPORTED_DATE, format = "%m/%d/%Y %h%M"))
+#ggplot(Traffic_crime, aes(x=REPORTED_DATE,)) + geom_bar()
+```
+
+
+I would like to continue working on this dataset, to find correlations between the different seasons and the incidence of traffic accidents, and whether or not there is an increase of crime depending on the temperature.
