@@ -1,0 +1,157 @@
+---
+title: "Part 2"
+output:
+  html_document:
+    df_print: paged
+---
+## Picking up where we left off
+
+First, we are going to want to pull all our data from part 1 and save both as a new file
+
+```{r echo=FALSE, message=FALSE, error=FALSE, warning=FALSE, results='hide'}
+include <- function(library_name){
+  if( !(library_name %in% installed.packages()) )
+    install.packages(library_name) 
+  library(library_name, character.only=TRUE)
+}
+include("tidyverse")
+include("knitr")
+include("rvest")
+include("ggplot2")
+purl("index.Rmd", output = "part1.r")
+source("part1.r")
+```
+
+We can pick up where we left off by printing the head of the `Traffic Crime` table, just to make sure it's there.
+```{r}
+head(Traffic_crime)
+```
+Good, it's there.
+
+# Adding a second source
+
+Now, I want to pull in weather data from the same area as the crimes. We're going to continue to focus on the Denver area, and we're going to scrape the web for data concerning the weather during the same time period, 2014, and 2018-2019.
+My hope is that we can find some sort of relation between the amount of incidents and the temperature.
+
+
+We're going to use the library `riem` to get historical weather data for the Denver area
+
+```{r}
+#installing riem
+#install.packages("riem")
+library("devtools")
+install_github("ropensci/riem")
+```
+
+```{r}
+# load riem
+library("riem")
+#this gives us a table of all riem networks we can use.
+# i was able to find colorado in this this, so that's what we'll use
+#riem_networks()
+riem_stations("CO_ASOS")
+```
+Now that we have which station we'd like to pull data from, and referencing the majority of dates from the `Traffic_crimes` table, we're going to want to pull weather information from those corresponding dates.
+```{r}
+wx_19 <- riem_measures("DEN", date_start = "2019-01-01", date_end = "2019-06-30")
+wx_18 <- riem_measures("DEN", date_start = "2018-01-01", date_end = "2018-12-31")
+wx_14 <- riem_measures("DEN", date_start = "2014-01-01", date_end = "2014-12-31")
+```
+
+If we look at the data, we notice that the temperature is only take at 7 minutes to the new hour, so we have a lot of rows that will need tidying. We also don't need to worry about `relative humidity, wind speed in knots, pressure altimeter in inches, sea level pressure in millibar` or `sky level coverage`, so we have quite a bit we can disregard.
+
+We're going to write a function, much like the one above, that will result in our data being tidied up a bit.
+```{r}
+omit_na <- function(data, desiredCols) {
+  completeVec <- complete.cases(data[, desiredCols])
+  return(data[completeVec, ])
+}
+wx_19 <- omit_na(wx_19, "tmpf")
+wx_18 <- omit_na(wx_18, "tmpf")
+wx_14 <- omit_na(wx_14, "tmpf")
+
+```
+This omitted all rows in `tmpf` that _didn't_ have a value. Now we can delete the rows we won't need.
+We know that we're not going to bother with anything other than the first 5 and the 30th columns, so we can just keep those rows.
+I think we should keep the temperature _and_ the windchill factor (labelled as _feel_) because that gives you a good impression of how cold it was and how cold it actually felt, which, if you dear reader, has ever had to experience a bad wind chill, will know that it can feel substantially different.
+
+
+```{r}
+wx_19 <- wx_19 %>% select(-31, -(6:29))
+wx_18 <- wx_18 %>% select(-31, -(6:29))
+wx_14 <- wx_14 %>% select(-31, -(6:29))
+test_wx_19 <- wx_19
+
+```
+
+Now we are left with some tidier data that we can play around with more easily. We have dates and times and temperatures and windchill factors.
+Let's see if we can plot this to a graph.
+```{r}
+#generic plot for temperature that includes labels and set for line instead of points
+temp_19 <- plot(wx_19$valid, wx_19$tmpf, xlab="Months", ylab="temperature in F", main = "Temperatures recorded hourly for Denver, CO", type = "l")
+
+```
+
+Now, that's incredibly generic but we _can_ get a generic idea of what's going on. It's colder in January than July, and as the year progresses, the temperature rises.
+We can also look at windchill in this same way.
+
+```{r}
+#generic plot for windchill that includes labels and set for line instead of points
+chill <- plot(wx_19$valid, wx_19$feel, xlab="Months", ylab="windchill in F", main = "Temperatures recorded hourly for Denver, CO", type = "l")
+
+```
+
+
+Let's try something more sophisticated. I want to see how both of those graphs would look overlayed on one another. To do this, we'll use a robust library called `ggplot2`. 
+```{r}
+# jan-jul 2019
+g_19 <- ggplot() + geom_line(aes(x=wx_19$valid, y=wx_19$tmpf), colour= "red")+ geom_line(aes(x=wx_19$valid, y=wx_19$feel), colour= "blue")
+g_19 + ggtitle("temperature in denver, co from january to july 2019") + labs(x="months", y="temp in f (in red), windchill (in blue)")
+```
+We can do the same for the other tables we have as well.
+
+```{r}
+#2018
+g_18 <- ggplot() + geom_line(aes(x=wx_18$valid, y=wx_18$tmpf), colour= "red")+ geom_line(aes(x=wx_18$valid, y=wx_18$feel), colour= "blue")
+g_18 + ggtitle("temperature in denver, co from for 2018") + labs(x="months", y="temp in f (in red), windchill (in blue)")
+
+```
+
+```{r}
+#2014
+g_14 <- ggplot() + geom_line(aes(x=wx_14$valid, y=wx_14$tmpf), colour= "red")+ geom_line(aes(x=wx_14$valid, y=wx_14$feel), colour= "blue")
+g_14 + ggtitle("temperature in denver, co for 2014") + labs(x="months", y="temp in f (in red), windchill (in blue)")
+```
+Now let's try looking at some data from `Traffic_crime` alongside our weather data. 
+We'll start with 2019, which means we need to parse our `Traffic_crime` data for dates that occur only in 2019
+```{r}
+tapply(Traffic_crime$REPORTED_DATE, Traffic_crime$OFFENSE_TYPE_ID,  FUN = function(x) length(unique(x)))
+
+```
+
+This let's us see how many different types of offenses there are, but we need to seperate based on date.
+```{r}
+#Traffic_crime_19 <- sqldf("select * from Traffic_crime where REPORTED_DATE='*2019*'")
+#head(Traffic_crime_19)
+```
+
+I have to create a function to make a new table that will combine the traffic crime and the weather data. I'm going to call it `TCWX` for "traffic crime and weather data"
+```{r}
+#creating new table from old
+TCWX <- Traffic_crime
+#setting reported date as date instead of char
+#TCWX$REPORTED_DATE <- as.POSIXct(as.numeric(as.character(TCWX$REPORTED_DATE)), origin="1970-01-01")
+
+#test19 <- merge(wx_19, TCWX, by=c("wx_19$valid", "Traffic_crime$REPORTED_DATE"))
+
+```
+
+Once we have our two different types of data merged together, we want to run a linear model to test cross-validation. That is, we want to randomly split the data into two sets, train the model, and then test the model. This will give us a standard deviation and a mean squared error rate.
+It essentially means that we can use our new data to determine if there is any correlation on our original data.
+
+```{r}
+# and here i fall short, cause i couldn't convert my damn reported_date into posix datetime, and therefore couldn't figure out how to merge the tables.
+# but onced merged, I know how to create the training and testing sets. 
+# plan to do that on the next deliverable. 
+```
+
