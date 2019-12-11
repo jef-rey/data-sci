@@ -1649,8 +1649,8 @@ summary {
 </div>
 <p>Good, it’s there.</p>
 </div>
-<div id="adding-a-second-source." class="section level1">
-<h1>Adding a second source.</h1>
+<div id="adding-a-second-source" class="section level1">
+<h1>Adding a second source</h1>
 <p>Now, I want to pull in weather data from the same area as the crimes. We’re going to continue to focus on the Denver area, and we’re going to scrape the web for data concerning the weather during the same time period, 2014, and 2018-2019. My hope is that we can find some sort of relation between the amount of incidents and the temperature.</p>
 <p>We’re going to use the library <code>riem</code> to get historical weather data for the Denver area</p>
 <pre class="r"><code>#installing riem
@@ -1658,8 +1658,38 @@ summary {
 library(&quot;devtools&quot;)</code></pre>
 <pre><code>## Loading required package: usethis</code></pre>
 <pre class="r"><code>install_github(&quot;ropensci/riem&quot;)</code></pre>
-<pre><code>## Skipping install of 'riem' from a github remote, the SHA1 (95e32388) has not changed since last install.
-##   Use `force = TRUE` to force installation</code></pre>
+<pre><code>## Downloading GitHub repo ropensci/riem@master</code></pre>
+<pre><code>## cli (1.1.0 -&gt; 2.0.0) [CRAN]</code></pre>
+<pre><code>## Installing 1 packages: cli</code></pre>
+<pre><code>## Installing package into '/usr/local/lib/R/3.6/site-library'
+## (as 'lib' is unspecified)</code></pre>
+<pre><code>##   
+   checking for file ‘/private/var/folders/j6/lxz1kns141l7x1nxldt28rx40000gn/T/RtmpV9e94P/remotes12bc95f3ea520/ropensci-riem-b2f2e41/DESCRIPTION’ ...
+  
+✔  checking for file ‘/private/var/folders/j6/lxz1kns141l7x1nxldt28rx40000gn/T/RtmpV9e94P/remotes12bc95f3ea520/ropensci-riem-b2f2e41/DESCRIPTION’ (416ms)
+## 
+  
+─  preparing ‘riem’:
+## 
+  
+   checking DESCRIPTION meta-information ...
+  
+✔  checking DESCRIPTION meta-information
+## 
+  
+─  checking for LF line-endings in source and make files and shell scripts
+## 
+  
+─  checking for empty or unneeded directories
+## 
+  
+─  building ‘riem_0.1.1.tar.gz’
+## 
+  
+   
+## </code></pre>
+<pre><code>## Installing package into '/usr/local/lib/R/3.6/site-library'
+## (as 'lib' is unspecified)</code></pre>
 <pre class="r"><code># load riem
 library(&quot;riem&quot;)
 #this gives us a table of all riem networks we can use.
@@ -1731,6 +1761,7 @@ TCWX &lt;- Traffic_crime
 <pre class="r"><code># and here i fall short, cause i couldn't convert my damn reported_date into posix datetime, and therefore couldn't figure out how to merge the tables.
 # but onced merged, I know how to create the training and testing sets. 
 # plan to do that on the next deliverable. </code></pre>
+<pre class="r"><code>#just gonna start again</code></pre>
 </div>
 
 
