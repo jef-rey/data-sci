@@ -26,8 +26,31 @@ Before we get too much further with this portion of the portfolio, I should high
 
 * I incorrectly titled the second plot in part 2, I have since changed the name to "Wind Chill Temperature recorded hourly for Denver, CO"
 * I corrected the `REPORTED_DATE` column in part 1 in the table `Traffic_crime` to work as POSIX time so that we could try to merge data easier.
-* In P2, I did a lot of work. I fixed my issues with `REPORTED_DATE` and separated it into two columns.
-* I also cleaned up `wx_18` in the same way.
+* In P2, I did a lot of work:
+  * I fixed my issues with `REPORTED_DATE` and separated it into two columns.
+  * I also cleaned up `wx_18` in the same way.
+  * I tidied up my data a bit more by removing unnessasary columns/variables
+  * I merged the data into a new table
+  * I ran a linear model on that data.
+  
+  
+# So, what does it all mean?
 
+As a reminder, let's look at the summary from the correlations we made so we can explore it further.
+```{r}
+summary(correlating)
+```
+
+
+This information can be hard to understand at first, but we can gain lots of insight from it.
+For one, that $p-value < 2.2e-16$ is very, very small. In fact, this is R's way of writing the closest number to $0$ that we could possibly get. Typically, you want a $p-value < 0.05$. So our p-value is well below that threshold. But the fact that _so many_ of these cells have a $1$ instead tells _me_ that the data is skewed somehow. Because of that, I'm rejecting my hypothesis that weather can predict traffic crime accurately. 
+
+As a reflection, I think that this overall was a good thesis, but the data proved me wrong.
+I thought that maybe police or the public could operationalize this information to avoid driving when they know the conditions are prime for crime.
+I also thought that maybe going on further with this project, we would have seen that, if there is more crime when it is warmer outside, and if summers are getting warmer each year, and increasing in length, then maybe that would correlate with an uptick in crime over the course of a number of years, or perhaps decades. With advancements in modern meteorology, we are able to predict the weather more accurately, and forecast further out into the future. Using the weather data, we could then be extra vigilant of more crime on those days. 
+
+Overall, I learned a great deal about data science, and how to map out data in new ways. I have a newfound appreciation for data scientists. Their work is hard, and while programming in R makes working with data easier, R itself is a real challenge to learn.
+
+I hope you enjoyed my portfolio project for data science. I doubt I'll get this publish on _medium_ anytime soon, but who knows. I could get better.
 
 
