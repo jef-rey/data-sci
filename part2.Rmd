@@ -186,7 +186,6 @@ It essentially means that we can use our new data to determine if there is any c
 
 
 ```{r}
-# as.numeric maybe?
 correlating <- lm(data=TCWX_18, formula=IS_CRIME~tmpf+feel+lat+lon+date)
 #summarise
 summary(correlating)
