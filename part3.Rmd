@@ -20,3 +20,14 @@ purl("part2.Rmd", output = "part2.r")
 source("part2.r")
 ```
 
+As we can see, the plots from temperature and wind chill loaded up, letting us know that everything was pulled over correctly.
+
+Before we get too much further with this portion of the portfolio, I should highlight some things I've cleaned up in the past sections:
+
+* I incorrectly titled the second plot in part 2, I have since changed the name to "Wind Chill Temperature recorded hourly for Denver, CO"
+* I corrected the `REPORTED_DATE` column in part 1 in the table `Traffic_crime` to work as POSIX time so that we could try to merge data easier.
+* In P2, I did a lot of work. I fixed my issues with `REPORTED_DATE` and separated it into two columns.
+* I also cleaned up `wx_18` in the same way.
+
+
+

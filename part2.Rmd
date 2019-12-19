@@ -97,7 +97,7 @@ We can also look at windchill in this same way.
 
 ```{r}
 #generic plot for windchill that includes labels and set for line instead of points
-chill <- plot(wx_19$valid, wx_19$feel, xlab="Months", ylab="windchill in F", main = "Temperatures recorded hourly for Denver, CO", type = "l")
+chill <- plot(wx_19$valid, wx_19$feel, xlab="Months", ylab="windchill in F", main = "Wind Chill Temperature recorded hourly for Denver, CO", type = "l")
 
 ```
 
@@ -130,31 +130,66 @@ tapply(Traffic_crime$REPORTED_DATE, Traffic_crime$OFFENSE_TYPE_ID,  FUN = functi
 ```
 
 This let's us see how many different types of offenses there are, but we need to seperate based on date.
-```{r}
-#Traffic_crime_19 <- sqldf("select * from Traffic_crime where REPORTED_DATE='*2019*'")
-#head(Traffic_crime_19)
-```
 
 I have to create a function to make a new table that will combine the traffic crime and the weather data. I'm going to call it `TCWX` for "traffic crime and weather data"
 ```{r}
 #creating new table from old
 TCWX <- Traffic_crime
-#setting reported date as date instead of char
-#TCWX$REPORTED_DATE <- as.POSIXct(as.numeric(as.character(TCWX$REPORTED_DATE)), origin="1970-01-01")
+#splitting time and date to be easier to work with
+TCWX$date <- format(as.POSIXct(TCWX$REPORTED_DATE, format="%Y-%m-%d %H:%M:%S"), "%Y-%m-%d")
+TCWX$time <- format(as.POSIXct(TCWX$REPORTED_DATE, format="%Y-%m-%d %H:%M:%S"), "%H:%M:%S")
+#getting rid of columns we don't need
+TCWX$OFFENSE_CODE_EXTENSION <- NULL
+TCWX$LAST_OCCURRENCE_DATE <- NULL
+TCWX$GEO_X <- NULL
+TCWX$GEO_Y <- NULL
+#since we have the incident address, i don't feel like we need the lat and lon
+#we really only need one or the other
+TCWX$GEO_LON <- NULL
+TCWX$GEO_LAT <- NULL
+TCWX$FIRST_OCCURRENCE_DATE <- NULL
+TCWX$DISTRICT_ID <- NULL
+TCWX$PRECINCT_ID <- NULL
+TCWX$OFFENSE_CATEGORY_ID <- NULL
+#now that i have the date and time separated, i can get rid of REPORTED_DATE
+TCWX$REPORTED_DATE <- NULL
+```
 
-#test19 <- merge(wx_19, TCWX, by=c("wx_19$valid", "Traffic_crime$REPORTED_DATE"))
+Let's create a table to run a model on that only incorporates a specific date range
+
+```{r}
+TCWX_in_prog <- sqldf("select * from TCWX where date >=2018 and date < 2019")
+```
+
+Now I need to separate time and date for `wx_18` in the same way that we did for `TCWX`
+
+```{r}
+#we need to separate the weather data's date and time just like TCWX so that I can merge this with TCWX
+wx_18$date <- format(as.POSIXct(wx_18$valid, format="%Y-%m-%d %H:%M:%S"), "%Y-%m-%d")
+wx_18$time <- format(as.POSIXct(wx_18$valid, format="%Y-%m-%d %H:%M:%S"), "%H:%M:%S")
+#then i can delete the valid column, as we don't need it anymore
+wx_18$valid <- NULL
+
 
 ```
 
-Once we have our two different types of data merged together, we want to run a linear model to test cross-validation. That is, we want to randomly split the data into two sets, train the model, and then test the model. This will give us a standard deviation and a mean squared error rate.
+Now we need to merge these two tables
+```{r}
+#omit NA values
+
+TCWX_18 <- merge(TCWX_in_prog, wx_18, by="date", all=TRUE)
+TCWX_18 <- na.omit(TCWX_18)
+```
+
+Once we have our new table with only the data we need, we want to run a linear model to test cross-validation. That is, we want to randomly split the data into two sets, train the model, and then test the model. This will give us a standard deviation and a mean squared error rate.
 It essentially means that we can use our new data to determine if there is any correlation on our original data.
 
-```{r}
-# and here i fall short, cause i couldn't convert my damn reported_date into posix datetime, and therefore couldn't figure out how to merge the tables.
-# but onced merged, I know how to create the training and testing sets. 
-# plan to do that on the next deliverable. 
-```
 
 ```{r}
-#just gonna start again
+# as.numeric maybe?
+correlating <- lm(data=TCWX_18, formula=IS_CRIME~tmpf+feel+lat+lon+date)
+#summarise
+summary(correlating)
 ```
+
+We can conclude that none of this data are clear predictors of traffic crime.

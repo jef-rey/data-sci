@@ -54,10 +54,10 @@ Traffic_crime <- sqldf("select * from full_crime_data where IS_TRAFFIC=1")
 Let's see if theres any correlation between time of year and number of traffic incidents.
 First, we'll convert the date into something more manageable.
 ```{r}
-#getting errors about the reported date into the correct format
-
-#Traffic_crime$REPORTED_DATE <- as.POSIXct(parse_date_time(Traffic_crime$REPORTED_DATE, format = "%m/%d/%Y %h%M"))
-#ggplot(Traffic_crime, aes(x=REPORTED_DATE,)) + geom_bar()
+#need to change column format first
+Traffic_crime$REPORTED_DATE <- parse_datetime(Traffic_crime$REPORTED_DATE, format = "%m/%d/%Y %H:%M:%S %p")
+#Traffic_crime$REPORTED_DATE <- as.POSIXlt(parse_date_time(Traffic_crime$REPORTED_DATE))
+#ggplot(Traffic_crime, aes(x=REPORTED_DATE,)) + geom_point(y = )
 ```
 
 
