@@ -192,4 +192,7 @@ correlating <- lm(data=TCWX_18, formula=IS_CRIME~tmpf+feel+lat+lon+date)
 summary(correlating)
 ```
 
-We can conclude that none of this data are clear predictors of traffic crime.
+We can conclude that none of this data are clear predictors of traffic crime. The numbers are absolutely horrible, and I expected this only after I began to work with the data. I chalk this up to data science being very hard.
+
+In Part 3, I will analyze my findings further!
+
